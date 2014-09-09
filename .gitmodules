@@ -1,0 +1,3 @@
+[submodule "submodules/encoded"]
+	path = submodules/encoded
+	url = https://github.com/ENCODE-DCC/encoded.git
