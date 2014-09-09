@@ -1,4 +1,5 @@
 from base import EncodeObject
+from base import HEADERS
 
 class AntibodyLotReview(EncodeObject):
     def __init__(self, accession, fetch=True):

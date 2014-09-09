@@ -1,3 +1,19 @@
+import json
+import requests
+import urlparse
+
+HEADERS = {'accept': 'application/json'}
+BASE_URL = 'https://www.encodeproject.org'
+
+def search(term, limit=25):
+    # This searches the ENCODE database for the phrase "bone chip"
+    url = urlparse.urljoin(BASE_URL, 'search/?searchTerm={}'.format(term))
+    url = urlparse.urljoin(url,
+                           '&format=json&frame=object&limit={}'.format(limit))
+
+    response = requests.get(url, headers=HEADERS)
+    response_json_dict = response.json()
+
 def fetch(identifier):
     """
     Fetch object from ENCODE
