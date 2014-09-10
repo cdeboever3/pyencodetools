@@ -17,15 +17,10 @@ ENCODE submodule:
 
 ## Strategy
 
-My overall goal for this package is to provide class for the various JSON
-objects that the [ENCODE API](https://www.encodeproject.org/help/rest-api/)
-returns. ENCODE has nice [json
-schemas](https://github.com/ENCODE-DCC/encoded/tree/master/src/encoded/schemas)
-that describe the different types of JSON objects that ENCODE works with. I
-couldn't find any suitable tools for converting JSON schemas into Python
-classes, so I took a very hacky approach and wrote a script that parses the
-schemas and prints out valid Python classes. Another perhaps more elegant option
-would have been to read the schemas and create the classes on the fly. However, 
-I couldn't devise an implementation of this approach that was satisfactory so I
-went with my hacky approach. This approach may not be tenable as ENCODE
-continues to update the schemas and they presumably become more complex.
+My overall goal for this package is to provide a nice Python interface for the
+[ENCODE API](https://www.encodeproject.org/help/rest-api/). I have created a
+general class `EncodeRecord` that wraps results from GET requests to the API.
+My plan is to add parses for various types of data returned from ENCODE to make
+the information more useful.  For instance, rather than just setting a
+"culture_harvest_date" as a string, I can convert is to a datetime object that
+is more useful within Python.
