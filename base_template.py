@@ -3,13 +3,12 @@ import requests
 import urlparse
 
 HEADERS = {'accept': 'application/json'}
-BASE_URL = 'https://www.encodeproject.org'
+ROOT_URL = 'https://www.encodeproject.org'
 
 def search(term, limit=25):
     # This searches the ENCODE database for the phrase "bone chip"
-    url = urlparse.urljoin(BASE_URL, 'search/?searchTerm={}'.format(term))
-    url = urlparse.urljoin(url,
-                           '&format=json&frame=object&limit={}'.format(limit))
+    url = urlparse.urljoin(ROOT_URL, 'search/?searchTerm={}'.format(term))
+    url += '&format=json&frame=object&limit={}'.format(limit)
 
     response = requests.get(url, headers=HEADERS)
     response_json_dict = response.json()
@@ -21,7 +20,7 @@ def search(term, limit=25):
         out = []
         for d in response_json_dict['@graph']:
             c = class_conversion(d['@type'][0])
-            out.append(c(d['accession'], json_dict=d))
+            out.append(c(d['uuid'], json_dict=d))
         return out
 
 def fetch(identifier):
@@ -53,6 +52,7 @@ class EncodeObject(object):
     def __init__(self, identifier, json_dict={}, fetch=False):
         self.identifier = identifier
         self.fetched = False
+        assert type(json_dict) == dict
         self.json_dict = json_dict
         if self.json_dict != {}:
             self._populate()

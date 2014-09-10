@@ -34,13 +34,16 @@ def make_class_conversion():
     lines = ['def class_conversion(t):']
     for k in LINKTO.keys():
         lines.append('\tif t == \'{}\':'.format(k))
-        lines.append('\t\treturn {}\n'.format(LINKTO[k]))
+        lines.append('\t\treturn {}'.format(LINKTO[k]))
+    lines[-1] = lines[-1] + '\n'
     return lines
 
 def make_classes(out, dy):
     import glob
     lines = []
     # lines.append('from base import EncodeObject\n')
+    lines += make_class_conversion()
+
     fns = glob.glob(os.path.join(dy, '*'))
     for fn in fns:
         if os.path.split(fn)[1] not in IGNORE:
@@ -55,13 +58,12 @@ def parse_schema(fn):
     d = json.load(f)
     f.close()
     lines = []
-    lines += make_class_conversion()
-
     # d['title'] is the class name
     class_name = make_class_name(d['title'])
     lines.append('class {}(EncodeObject):'.format(class_name))
-    lines.append('\tdef __init__(self, accession, fetch=True):')
-    lines.append('\t\tEncodeObject.__init__(self, accession)')
+    lines.append('\tdef __init__(self, accession, json_dict={}, fetch=True):')
+    lines.append('\t\tEncodeObject.__init__(self, accession, '
+                 'json_dict=json_dict, fetch=fetch)')
     lines.append('\t\tif fetch:')
     lines.append('\t\t\tself.fetch()\n')
 
@@ -98,8 +100,10 @@ def parse_link_to(name, d):
                                                                name))
     else:
         link = LINKTO[d['linkTo']]
-        lines.append('\t\t\tself.{0}.append({1}'
-                     '(d[\'{0}\'], fetch=False))'.format(name, link))
+        # lines.append('\t\t\tself.{0}.append({1}'
+        #              '(d[\'{0}\'], fetch=False))'.format(name, link))
+        lines.append('\t\t\tself.{0} = {1}'
+                     '(d[\'{0}\'], fetch=False)'.format(name, link))
     return lines
 
 def parse_string(name, d):
@@ -196,6 +200,7 @@ def parse_integer(name, d):
 def parse_list(name, d):
     """Parse attribute of type 'list'"""
     lines = []
+    lines.append('\t\tif d.has_key(\'{}\'):'.format(name))
     if set(d['type']) == set(['number', 'string']):
         lines.append('\t\t\ttry:')
         lines.append('\t\t\t\tself.{0} = float(d[\'{0}\'])'.format(name))
@@ -252,7 +257,7 @@ def parse_attr(name, d):
             lines += parse_list(name, d)
 
     if d.has_key('enum'):
-        lines.append('\t\tassert self.{} in {}'.format(name, str(d['enum'])))
+        lines.append('\t\t\tassert self.{} in {}'.format(name, str(d['enum'])))
     
     return lines
 
