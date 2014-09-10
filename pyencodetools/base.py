@@ -9,7 +9,7 @@ SHORT_URL_PATTERN = re.compile('^/.*/.*/$')
 
 def _parse_attr_string(s):
     if SHORT_URL_PATTERN.match(s):
-        return EncodeRecord(s, fetch=False)
+        return ENCODERecord(s, fetch=False)
     else:
             return str(s)
 
@@ -28,7 +28,7 @@ def search(term, limit=25):
     else:
         out = []
         for d in response_json_dict['@graph']:
-            out.append(EncodeRecord(d['uuid'], json_dict=d))
+            out.append(ENCODERecord(d['uuid'], json_dict=d))
         return out
 
 def fetch(identifier):
@@ -49,13 +49,13 @@ def fetch(identifier):
         If the identifier can't be fetched, obj will be None.
 
     """
-    e = EncodeRecord(identifier)
+    e = ENCODERecord(identifier)
     if e.json_dict is None:
         return None
     else:
         return e
 
-class EncodeRecord(object):
+class ENCODERecord(object):
     def __init__(self, identifier, json_dict={}, fetch=True):
         self.identifier = identifier
         self.fetched = False
@@ -120,10 +120,12 @@ class EncodeRecord(object):
     def _populate(self):
         """Set various attributes"""
         for k in self.json_dict:
-            if type(self.json_dict[k]) == str:
-                self.__dict__[k] = _parse_attr_list(self.json_dict[k])
-            elif type(self.json_dict[k]) == list:
+            val = self.json_dict[k]
+            if type(val) == str:
+                self.__dict__[k] = _parse_attr_list(val)
+            elif (type(val) == list and 
+                  set([type(x) for x in val]) == set([str])):
                 self.__dict__[k] = [_parse_attr_string(x) for x in
-                                    self.json_dict[k]]
+                                    val]
             else:
-                self.__dict__[k] = str(self.json_dict[k])
+                self.__dict__[k] = str(val)
