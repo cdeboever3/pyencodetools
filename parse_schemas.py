@@ -4,7 +4,7 @@ import pdb
 import urlparse
 
 # Schemas we don't want to parse,
-IGNORE = ['access_key.json', 'mixins.json', 'namespaces.json']
+IGNORE = ['access_key.json', 'edw_key.json', 'mixins.json', 'namespaces.json']
 
 def make_link_dict(dy='.'):
     """Make dict that maps titles to class names"""
@@ -29,10 +29,18 @@ def make_class_name(title):
 
 LINKTO = make_link_dict('submodules/encoded/src/encoded/schemas/')
 
+def make_class_conversion():
+    """Make mapping between types and classes"""
+    lines = ['def class_conversion(t):']
+    for k in LINKTO.keys():
+        lines.append('\tif t == \'{}\':'.format(k))
+        lines.append('\t\treturn {}\n'.format(LINKTO[k]))
+    return lines
+
 def make_classes(out, dy):
     import glob
     lines = []
-    lines.append('from base import EncodeObject\n')
+    # lines.append('from base import EncodeObject\n')
     fns = glob.glob(os.path.join(dy, '*'))
     for fn in fns:
         if os.path.split(fn)[1] not in IGNORE:
@@ -47,6 +55,8 @@ def parse_schema(fn):
     d = json.load(f)
     f.close()
     lines = []
+    lines += make_class_conversion()
+
     # d['title'] is the class name
     class_name = make_class_name(d['title'])
     lines.append('class {}(EncodeObject):'.format(class_name))
@@ -59,8 +69,9 @@ def parse_schema(fn):
     lines.append('\t\td = self.json_dict')
 
     # We'll pull attributes from d['properties'], d['calculated_props'], and
-    # d['facets']. I need to check facets still.
-    # TODO: add in facets.
+    # d['facets']. 
+    # TODO: Add in facets. I'm not actually sure what these are and whether I
+    # need them. They typically don't have much info in the schemas.
     for k in ['properties', 'calculated_props']:#, 'facets']:
         if d.has_key(k):
             for kk in d[k].keys():
@@ -246,7 +257,7 @@ def parse_attr(name, d):
     return lines
 
 def main():
-    make_classes('pyencodetools/classes.py', 
+    make_classes('classes_template.py', 
                  'submodules/encoded/src/encoded/schemas/')
 
 if __name__ == '__main__':
