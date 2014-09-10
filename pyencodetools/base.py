@@ -2,6 +2,7 @@ import json
 import re
 import requests
 import urlparse
+import warnings
 
 HEADERS = {'accept': 'application/json'}
 ROOT_URL = 'https://www.encodeproject.org'
@@ -13,23 +14,32 @@ def _parse_attr_string(s):
     else:
             return str(s)
 
+def query(url):
+    """Query ENCODE API and return dict with results"""
+    response = requests.get(url, headers=HEADERS)
+    response_json_dict = response.json()
+    if response.status_code != 200:
+        warnings.warn('Response status {} from '
+                      'ENCODE'.format(response.status_code))
+        return None
+    else:
+        return response_json_dict
+
 def search(term, limit=25):
     """This searches the ENCODE database for the phrase term"""
     url = urlparse.urljoin(ROOT_URL, 'search/?searchTerm={}'.format(term))
     url += '&format=json&frame=object&limit={}'.format(limit)
-
-    response = requests.get(url, headers=HEADERS)
-    response_json_dict = response.json()
-    if response.status_code != 200:
-        # TODO: This should probably be an error.
-        return None
-    elif len(response_json_dict['@graph']) == 0:
-        return []
+    response_json_dict = query(url)
+    if res:
+        if len(response_json_dict['@graph']) == 0:
+            return []
+        else:
+            out = []
+            for d in response_json_dict['@graph']:
+                out.append(ENCODERecord(d['uuid'], json_dict=d))
+            return out
     else:
-        out = []
-        for d in response_json_dict['@graph']:
-            out.append(ENCODERecord(d['uuid'], json_dict=d))
-        return out
+        return None
 
 def fetch(identifier):
     """
