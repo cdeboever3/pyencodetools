@@ -93,7 +93,7 @@ def parse_link_to(name, d):
         # TODO: check if this change below is correct.
         for link in d['linkTo']:
             # lines.append('\t\t\tif d[\'{}\'] == {}:'.format(name, LINKTO[link]))
-            lines.append('\t\t\tif d[\'{}\'].split(\'/\')[1] == {}:'.format(
+            lines.append('\t\t\tif d[\'{}\'].split(\'/\')[1] == \'{}\':'.format(
                 name, link))
             lines.append('\t\t\t\tself.{} '.format(name) + 
                          '= {}(d[\'{}\'], fetch=False)'.format(LINKTO[link], 
@@ -122,14 +122,14 @@ def parse_link_to_for_dict(name, d, attr):
     # If the linkTo is a list, then the object can be of different types.
     if type(d['linkTo']) == list:
         for link in d['linkTo']:
-            lines.append('\t\t\tif d[\'{}\'].split(\'/\')[1] == {}:'.format(
-                name, link))
-            lines.append('\t\t\t\tself.{}[\'{}\'] '.format(attr, name) + 
+            lines.append('\t\t\t\t\tif d[\'{}\'].split(\'/\')[1] == '
+                         '\'{}\':'.format(name, link))
+            lines.append('\t\t\t\t\t\tself.{}[\'{}\'] '.format(attr, name) + 
                          '= {}(d[\'{}\'][\'{}\'], fetch=False)'.format(
                              LINKTO[link], attr, name))
     else:
         link = LINKTO[d['linkTo']]
-        lines.append('\t\t\tself.{0}[\'{1}\'] = '
+        lines.append('\t\t\t\t\tself.{0}[\'{1}\'] = '
                      '{2}(d[\'{0}\'][\'{1}\'], fetch=False)'.format(
                          attr, name, link))
     return lines
@@ -137,21 +137,21 @@ def parse_link_to_for_dict(name, d, attr):
 def parse_integer_for_dict(name, d, attr):
     """Parse attribute of type 'integer'"""
     lines = []
-    lines.append('\t\tif d[\'{}\'].has_key(\'{}\'):'.format(attr, name))
-    lines.append('\t\t\tself.{0}[\'{1}\'] = int(d[\'{0}\'][\'{1}\'])'.format(
-        attr, name))
+    lines.append('\t\t\t\tif d[\'{}\'].has_key(\'{}\'):'.format(attr, name))
+    lines.append('\t\t\t\t\tself.{0}[\'{1}\'] = '
+                 'int(d[\'{0}\'][\'{1}\'])'.format(attr, name))
     return lines
 
 def parse_string_for_dict(name, d, attr):
     """Parse object of type 'string' that comes from an array attribute with
     type object"""
     lines = []
-    lines.append('\t\tif d[\'{}\'].has_key(\'{}\'):'.format(attr, name))
+    lines.append('\t\t\t\tif d[\'{}\'].has_key(\'{}\'):'.format(attr, name))
     if d.has_key('linkTo'):
         lines += parse_link_to_for_dict(name, d, attr)
     else:
-        lines.append('\t\t\tself.{0}[\'{1}\'] = d[\'{0}\'][\'{1}\']'.format(
-            attr, name))
+        lines.append('\t\t\t\t\tself.{0}[\'{1}\'] = '
+                     'd[\'{0}\'][\'{1}\']'.format(attr, name))
     return lines
 
 def parse_array(name, d):
@@ -162,7 +162,10 @@ def parse_array(name, d):
     # the different stuff. Unfortunately, these items are just as complex as the
     # typical attributes so we have to do some work to parse them.
     if d['items']['type'] == 'object':
-        lines.append('\t\t\tself.{} = {{}}'.format(name))
+        lines.append('\t\t\tif type(d[\'{}\']) == list:'.format(name))
+        lines.append('\t\t\t\tself.{0} = d[\'{0}\']'.format(name))
+        lines.append('\t\t\telif type(d[\'{}\']) == dict:'.format(name))
+        lines.append('\t\t\t\tself.{0} = {{}}'.format(name))
 
         for k in d['items']['properties'].keys():
             if not d['items']['properties'][k].has_key('type'):

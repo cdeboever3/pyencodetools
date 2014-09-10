@@ -113,19 +113,22 @@ class AntibodyCharacterization(EncodeObject):
         # Primary characterization lane reviews: Characterization details reviewed by each cell type for immunoblot and immunoprecipitation primary characterizations only.
         # Do not submit status, it is assigned by DCC when reviewing the characterization.
         if d.has_key('characterization_reviews'):
-            self.characterization_reviews = {}
-        if d['characterization_reviews'].has_key('lane_status'):
-            self.characterization_reviews['lane_status'] = d['characterization_reviews']['lane_status']
-        if d['characterization_reviews'].has_key('lane'):
-            self.characterization_reviews['lane'] = int(d['characterization_reviews']['lane'])
-        if d['characterization_reviews'].has_key('biosample_term_id'):
-            self.characterization_reviews['biosample_term_id'] = d['characterization_reviews']['biosample_term_id']
-        if d['characterization_reviews'].has_key('biosample_type'):
-            self.characterization_reviews['biosample_type'] = d['characterization_reviews']['biosample_type']
-        if d['characterization_reviews'].has_key('biosample_term_name'):
-            self.characterization_reviews['biosample_term_name'] = d['characterization_reviews']['biosample_term_name']
-        if d['characterization_reviews'].has_key('organism'):
-            self.characterization_reviews['organism'] = Organism(d['characterization_reviews']['organism'], fetch=False)
+            if type(d['characterization_reviews']) == list:
+                self.characterization_reviews = d['characterization_reviews']
+            elif type(d['characterization_reviews']) == dict:
+                self.characterization_reviews = {}
+                if d['characterization_reviews'].has_key('lane_status'):
+                    self.characterization_reviews['lane_status'] = d['characterization_reviews']['lane_status']
+                if d['characterization_reviews'].has_key('lane'):
+                    self.characterization_reviews['lane'] = int(d['characterization_reviews']['lane'])
+                if d['characterization_reviews'].has_key('biosample_term_id'):
+                    self.characterization_reviews['biosample_term_id'] = d['characterization_reviews']['biosample_term_id']
+                if d['characterization_reviews'].has_key('biosample_type'):
+                    self.characterization_reviews['biosample_type'] = d['characterization_reviews']['biosample_type']
+                if d['characterization_reviews'].has_key('biosample_term_name'):
+                    self.characterization_reviews['biosample_term_name'] = d['characterization_reviews']['biosample_term_name']
+                if d['characterization_reviews'].has_key('organism'):
+                    self.characterization_reviews['organism'] = Organism(d['characterization_reviews']['organism'], fetch=False)
         # Target: The name of the gene whose expression or product is the intended goal of the antibody.
         # See target.json for available identifiers.
         if d.has_key('target'):
@@ -481,11 +484,14 @@ class DNAConstruct(EncodeObject):
             self.description = d['description']
         # Protein tags: Recombinant tags in the construct.
         if d.has_key('tags'):
-            self.tags = {}
-        if d['tags'].has_key('name'):
-            self.tags['name'] = d['tags']['name']
-        if d['tags'].has_key('location'):
-            self.tags['location'] = d['tags']['location']
+            if type(d['tags']) == list:
+                self.tags = d['tags']
+            elif type(d['tags']) == dict:
+                self.tags = {}
+                if d['tags'].has_key('name'):
+                    self.tags['name'] = d['tags']['name']
+                if d['tags'].has_key('location'):
+                    self.tags['location'] = d['tags']['location']
         # URL: An external resource with additional information about the construct.
         if d.has_key('url'):
             self.url = d['url']
@@ -743,15 +749,18 @@ class DataFile(EncodeObject):
             self.platform = Platform(d['platform'], fetch=False)
         # Flowcells: For high-throughput sequencing, the flowcells used for the sequencing of the replicate.
         if d.has_key('flowcell_details'):
-            self.flowcell_details = {}
-        if d['flowcell_details'].has_key('machine'):
-            self.flowcell_details['machine'] = d['flowcell_details']['machine']
-        if d['flowcell_details'].has_key('lane'):
-            self.flowcell_details['lane'] = d['flowcell_details']['lane']
-        if d['flowcell_details'].has_key('barcode'):
-            self.flowcell_details['barcode'] = d['flowcell_details']['barcode']
-        if d['flowcell_details'].has_key('flowcell'):
-            self.flowcell_details['flowcell'] = d['flowcell_details']['flowcell']
+            if type(d['flowcell_details']) == list:
+                self.flowcell_details = d['flowcell_details']
+            elif type(d['flowcell_details']) == dict:
+                self.flowcell_details = {}
+                if d['flowcell_details'].has_key('machine'):
+                    self.flowcell_details['machine'] = d['flowcell_details']['machine']
+                if d['flowcell_details'].has_key('lane'):
+                    self.flowcell_details['lane'] = d['flowcell_details']['lane']
+                if d['flowcell_details'].has_key('barcode'):
+                    self.flowcell_details['barcode'] = d['flowcell_details']['barcode']
+                if d['flowcell_details'].has_key('flowcell'):
+                    self.flowcell_details['flowcell'] = d['flowcell_details']['flowcell']
         # Replicate: The experimental replicate designation for the file.
         # See replicate.json for available identifiers.
         if d.has_key('replicate'):
@@ -780,9 +789,9 @@ class DataFile(EncodeObject):
         # Dataset: The experiment or dataset the file belongs to.
         # For experiments, see experiment.json for available identifiers. For datasets, see dataset.json for available identifiers.
         if d.has_key('dataset'):
-            if d['dataset'].split('/')[1] == experiment:
+            if d['dataset'].split('/')[1] == 'experiment':
                 self.dataset = Experiment(d['dataset'], fetch=False)
-            if d['dataset'].split('/')[1] == dataset:
+            if d['dataset'].split('/')[1] == 'dataset':
                 self.dataset = Dataset(d['dataset'], fetch=False)
         # Download URL
         if d.has_key('href'):
@@ -1211,15 +1220,18 @@ class Replicate(EncodeObject):
             self.read_length = int(d['read_length'])
         # Flowcells: For high-throughput sequencing, the flowcells used for the sequencing of the replicate.
         if d.has_key('flowcell_details'):
-            self.flowcell_details = {}
-        if d['flowcell_details'].has_key('machine'):
-            self.flowcell_details['machine'] = d['flowcell_details']['machine']
-        if d['flowcell_details'].has_key('lane'):
-            self.flowcell_details['lane'] = d['flowcell_details']['lane']
-        if d['flowcell_details'].has_key('barcode'):
-            self.flowcell_details['barcode'] = d['flowcell_details']['barcode']
-        if d['flowcell_details'].has_key('flowcell'):
-            self.flowcell_details['flowcell'] = d['flowcell_details']['flowcell']
+            if type(d['flowcell_details']) == list:
+                self.flowcell_details = d['flowcell_details']
+            elif type(d['flowcell_details']) == dict:
+                self.flowcell_details = {}
+                if d['flowcell_details'].has_key('machine'):
+                    self.flowcell_details['machine'] = d['flowcell_details']['machine']
+                if d['flowcell_details'].has_key('lane'):
+                    self.flowcell_details['lane'] = d['flowcell_details']['lane']
+                if d['flowcell_details'].has_key('barcode'):
+                    self.flowcell_details['barcode'] = d['flowcell_details']['barcode']
+                if d['flowcell_details'].has_key('flowcell'):
+                    self.flowcell_details['flowcell'] = d['flowcell_details']['flowcell']
         # Technical replicate: Data collection under the same methods using the same biological source, measuring the variability in the method.
         if d.has_key('technical_replicate_number'):
             self.technical_replicate_number = int(d['technical_replicate_number'])

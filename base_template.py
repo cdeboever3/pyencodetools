@@ -13,6 +13,7 @@ def search(term, limit=25):
     response = requests.get(url, headers=HEADERS)
     response_json_dict = response.json()
     if response.status_code != 200:
+        # TODO: This should probably be an error.
         return None
     elif len(response_json_dict['@graph']) == 0:
         return []
