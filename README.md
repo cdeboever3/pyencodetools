@@ -30,7 +30,7 @@ If you have an ENCODE identifier such as a
 you can query the ENCODE API as follows:
 
 	import pyencodetools as pet
-	res = pet.fetch('ENCBS000AAA/')
+	res = pet.fetch('ENCBS000AAA')
 
 `fetch` can take as input different identifiers and query the ENCODE API.
 `fetch` returns an `ENCODERecord` object with attributes that correspond to the

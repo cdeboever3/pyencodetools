@@ -67,7 +67,7 @@ def fetch(identifier):
 
 class ENCODERecord(object):
     def __init__(self, identifier, json_dict={}, fetch=True):
-        self.identifier = identifier
+        self._identifier = identifier
         self.fetched = False
         assert type(json_dict) == dict
         self.json_dict = json_dict
@@ -86,39 +86,23 @@ class ENCODERecord(object):
             raise AttributeError
     
     def fetch(self):
-        """
-        Fetch object from ENCODE
-
-        Parameters
-        ----------
-        identifier : str
-            ENCODE accession, short URL (e.g. /human-donors/ENCDO000AAE/), or 
-            long URL (e.g.) https://www.encodeproject.org/biosample/ENCBS000AAA/
-
-        Returns
-        -------
-        obj : some object
-            If identifier is successfully fetched from ENCODE, obj will be the 
-            object that corresponds to identifier (e.g. Biosample, Donor, etc.).
-            If the identifier can't be fetched, obj will be None.
-
-        """
+        """Fetch object from ENCODE and populate attributes"""
         # Long URL. If the first 30 characters are the ENCODE URL, we'll try to
         # submit the identifier as the URL.
-        if self.identifier[0:30] == 'https://www.encodeproject.org/':
-            self.query_url = self.identifier
+        if self._identifier[0:30] == 'https://www.encodeproject.org/':
+            self._query_url = self._identifier
 
         # Short URL.
-        elif '/' in self.identifier:
-            self.query_url = urlparse.urljoin(ROOT_URL, self.identifier)
-            self.query_url = urlparse.urljoin(self.query_url, '?frame=object')
+        elif '/' in self._identifier:
+            self._query_url = urlparse.urljoin(ROOT_URL, self._identifier)
+            self._query_url = urlparse.urljoin(self._query_url, '?frame=object')
 
         # Assume we have an accession or a UUID.
         else:
-            self.query_url = urlparse.urljoin(ROOT_URL, self.identifier)
-            self.query_url = urlparse.urljoin(self.query_url, '?frame=object')
+            self._query_url = urlparse.urljoin(ROOT_URL, self._identifier)
+            self._query_url = urlparse.urljoin(self._query_url, '?frame=object')
 
-        response = requests.get(self.query_url, headers=HEADERS)
+        response = requests.get(self._query_url, headers=HEADERS)
         if response.status_code == 200:
             self.json_dict = response.json()
         else:
@@ -130,12 +114,22 @@ class ENCODERecord(object):
     def _populate(self):
         """Set various attributes"""
         for k in self.json_dict:
+            if type(k) == unicode:
+                k = str(k)
+
+            if k == 'treatments':
+                import pdb
+                pdb.set_trace()
+
             val = self.json_dict[k]
-            if type(val) == str:
-                self.__dict__[k] = _parse_attr_list(val)
+
+            if type(val) == str or type(val) == unicode:
+                self.__dict__[k] = _parse_attr_string(val)
             elif (type(val) == list and 
-                  set([type(x) for x in val]) == set([str])):
+                  set([type(x) for x in val]) == set([unicode])):
                 self.__dict__[k] = [_parse_attr_string(x) for x in
                                     val]
+            elif val == [] or val == {}:
+                pass
             else:
                 self.__dict__[k] = str(val)
