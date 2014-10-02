@@ -45,10 +45,26 @@ You can search the ENCODE API as follows:
 
 	search_res = pet.search('bone chip')
 
-`search_res` will be a list of `ENCODERecord` objects that match the search term. There is a default limit
-on the numer of results returned that can be changed:
+`search_res` will be a list of `ENCODERecord` objects that match the search
+term. There is a default limit on the numer of results returned that can be
+changed:
 
 	search_res = pet.search('bone chip', limit=10)
+
+#### Advanced Search
+
+If you want to search using ENCODE's search parameters, begin your search term
+with '?'. For instance, the following query returns all DNAse experiments in
+human (up to a limit of 1,000 experiments):
+
+	search_res = pet.search('?type=experiment&assay_term_name=DNase-seq&replicates.library.biosample.donor.organism.scientific_name=Homo%20sapiens', limit=1000)
+
+You can see how these types of queries are constructed by looking at the
+[ENCODE API documentation](https://www.encodeproject.org/help/rest-api/) or by
+going to one of the ENCODE data pages (such as the [Assays
+page](https://www.encodeproject.org/search/?type=experiment) and applying some
+of the filters on the left side of the page. As you apply the filters, the URL
+will update with the appropriate search term.
 
 ## Development
 

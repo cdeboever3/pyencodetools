@@ -55,10 +55,15 @@ def query(url):
 
 def search(term, limit=25):
     """This searches the ENCODE database for the phrase term"""
-    url = urlparse.urljoin(ROOT_URL, 'search/?searchTerm={}'.format(term))
+    # If term starts with '?' then I'll assume the term is advanced search using
+    # filters.
+    if term[0] == '?':
+        url = urlparse.urljoin(ROOT_URL, 'search/{}'.format(term))
+    else:
+        url = urlparse.urljoin(ROOT_URL, 'search/?searchTerm={}'.format(term))
     url += '&format=json&frame=object&limit={}'.format(limit)
     response_json_dict = query(url)
-    if res:
+    if response_json_dict:
         if len(response_json_dict['@graph']) == 0:
             return []
         else:
@@ -146,6 +151,8 @@ class ENCODERecord(object):
                 k = str(k)
 
             val = self.json_dict[k]
+            # Replace @'s so the attribute name is valid.
+            k = k.replace('@', '')
 
             if type(val) == str or type(val) == unicode:
                 self.__dict__[k] = _parse_attr_string(val)
