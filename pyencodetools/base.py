@@ -9,10 +9,38 @@ ROOT_URL = 'https://www.encodeproject.org'
 SHORT_URL_PATTERN = re.compile('^/.*/.*/$')
 
 def _parse_attr_string(s):
+    """
+    Parse string from ENCODE. If possible, return an ENCODERecord object, float,
+    int, etc. If not, just return a string representation.
+
+    Parameters
+    ----------
+    s : str
+        String from ENCODE. Can be a short URL (e.g. /human-donors/ENCDO000AAE/)
+        or some other kind of string.
+
+    Returns
+    -------
+    out : some object
+        If s matches SHORT_URL_PATTERN, an ENCODERecord object will be returned
+        (but it's attributes will not be fetched to prevent unnecessary calls to
+        ENCODE). Otherwise, a float, int, or string will be returned.
+
+    """
     if SHORT_URL_PATTERN.match(s):
-        return ENCODERecord(s, fetch=False)
+        out = ENCODERecord(s, fetch=False)
     else:
-            return str(s)
+        if '.' in s:
+            try:
+                out = float(s)
+            except ValueError:
+                out = str(s)
+        else:
+            try:
+                out = int(s)
+            except ValueError:
+                out = str(s)
+    return out
 
 def query(url):
     """Query ENCODE API and return dict with results"""
@@ -116,10 +144,6 @@ class ENCODERecord(object):
         for k in self.json_dict:
             if type(k) == unicode:
                 k = str(k)
-
-            # if k == 'treatments':
-            #     import pdb
-            #     pdb.set_trace()
 
             val = self.json_dict[k]
 
