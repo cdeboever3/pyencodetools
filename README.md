@@ -25,7 +25,7 @@ If you have an ENCODE identifier such as a
  * long URL: https://www.encodeproject.org/biosample/ENCBS000AAA/
  * short URL: /biosample/ENCBS000AAA/
  * accession: ENCBS000AAA
- * UUID: 
+ * UUID: 56e94f2b-25ac-4c58-9828-f63b66220999
 
 you can query the ENCODE API as follows:
 

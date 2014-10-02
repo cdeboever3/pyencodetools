@@ -117,19 +117,19 @@ class ENCODERecord(object):
             if type(k) == unicode:
                 k = str(k)
 
-            if k == 'treatments':
-                import pdb
-                pdb.set_trace()
+            # if k == 'treatments':
+            #     import pdb
+            #     pdb.set_trace()
 
             val = self.json_dict[k]
 
             if type(val) == str or type(val) == unicode:
                 self.__dict__[k] = _parse_attr_string(val)
+            elif val == [] or val == {}:
+                pass
             elif (type(val) == list and 
                   set([type(x) for x in val]) == set([unicode])):
                 self.__dict__[k] = [_parse_attr_string(x) for x in
                                     val]
-            elif val == [] or val == {}:
-                pass
             else:
                 self.__dict__[k] = str(val)
